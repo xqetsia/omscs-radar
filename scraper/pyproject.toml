@@ -1,0 +1,24 @@
+[project]
+name = "omscs-ratings-scraper"
+version = "0.1.0"
+description = "Scrapers for OMSHub and OMSCentral course review aggregates."
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.4",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/scraper"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
