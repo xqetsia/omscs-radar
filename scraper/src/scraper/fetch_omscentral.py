@@ -6,7 +6,7 @@ containing the rating, difficulty, and workload values.
 
 import httpx
 
-URL = "https://www.omscentral.com/courses/machine-learning/reviews"
+URL = "https://www.omscentral.com/"
 USER_AGENT = (
     "omscs-radar/0.1 (diagnostic; +https://github.com/xqetsia/omscs-radar)"
 )
