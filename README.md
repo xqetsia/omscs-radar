@@ -2,11 +2,11 @@
 
 A Chrome extension that overlays community ratings, difficulty, and workload directly on the [Georgia Tech OMSCS course catalog](https://omscs.gatech.edu/current-courses) — pulling data from [OMSHub](https://www.omshub.org) and [OMSCentral](https://www.omscentral.com).
 
-> **Status:** Work in progress. Built by an incoming OMSCS student to learn the program's courses better — and to give back something useful to the community.
+> **Status:** Work in progress. Built by an incoming OMSCS student to plan their courses better and to give back something useful to the community.
 
 ## Why this exists
 
-The official OMSCS catalog page lists ~60 courses but tells you nothing about what they're actually like. The community has built excellent review sites — but to use them you have to leave the catalog, search each course, and context-switch constantly. omscs-radar surfaces aggregate ratings right next to each course on the official catalog, so you can scan the list and decide what to dig into.
+The official OMSCS catalog page lists ~60 courses but tells you nothing about what they're actually like. The community has built excellent review sites. A painpoint emerges because in order to use the review sites you have to leave the catalog, search each course, and context-switch constantly. omscs-radar surfaces aggregate ratings right next to each course on the official catalog, so you can scan the list and decide what to dig into.
 
 ## Architecture
 
@@ -119,7 +119,7 @@ cd scraper && ruff check .
 
 ## License
 
-MIT © _Your Name_
+MIT © Qetsia Nkulu
 
 ---
 
