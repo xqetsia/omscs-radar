@@ -15,7 +15,7 @@ import json
 from typing import Any
 
 from bs4 import BeautifulSoup
-
+from .models import Source, SourceCourseRating
 
 class ParseError(Exception):
     """Raised when expected data cannot be extracted from the HTML.
@@ -144,6 +144,38 @@ def extract_courses(html: str) -> list[dict[str, Any]]:
     return courses
 
 
+def _clean_undefined(value: object) -> object:
+    """RSC encodes JS `undefined` as the string '$undefined'. Treat as None."""
+    return None if value == "$undefined" else value
+
+
+def to_source_rating(raw: dict[str, object]) -> "SourceCourseRating":
+    """Convert one raw OMSCentral RSC dict into a SourceCourseRating."""
+    codes = raw.get("codes") or []
+    if not isinstance(codes, list) or not codes:
+        raise ParseError(f"Course has no codes: {raw.get('_id')}")
+    code = codes[0]
+
+    name = raw.get("name")
+    if not isinstance(name, str) or not name:
+        raise ParseError(f"Course {code} has no name")
+
+    return SourceCourseRating(
+        source=Source.OMSCENTRAL,
+        course_code=code,
+        name=name,
+        rating=_clean_undefined(raw.get("rating")),
+        difficulty=_clean_undefined(raw.get("difficulty")),
+        workload_hours_per_week=_clean_undefined(raw.get("workload")),
+        review_count=_clean_undefined(raw.get("reviewCount")),
+        description=raw.get("description"),
+        credit_hours=raw.get("creditHours"),
+        is_foundational=raw.get("isFoundational"),
+        is_deprecated=raw.get("isDeprecated"),
+        official_url=raw.get("officialURL"),
+    )
+
+
 # Smoke test — run this file directly.
 if __name__ == "__main__":
     import httpx
@@ -154,19 +186,23 @@ if __name__ == "__main__":
     response = httpx.get(URL, headers={"User-Agent": USER_AGENT}, timeout=15.0)
     response.raise_for_status()
 
-    courses = extract_courses(response.text)
-    print(f"Extracted {len(courses)} courses\n")
+    raw_courses = extract_courses(response.text)
+    ratings = [to_source_rating(c) for c in raw_courses]
 
-    def _fmt(v: object) -> str:
-        return f"{v:.2f}" if isinstance(v, (int, float)) else str(v)
+    print(f"Parsed {len(ratings)} courses\n")
 
-    for c in courses[:10]:
-        codes = c.get("codes", [])
-        code = codes[0] if codes else "???"
+    # Show 10 with reviews and 3 without, to verify both code paths
+    with_reviews = [r for r in ratings if r.rating is not None]
+    without = [r for r in ratings if r.rating is None]
+
+    print(f"  {len(with_reviews)} courses have ratings, {len(without)} do not\n")
+
+    for r in with_reviews[:10]:
         print(
-            f"  {code:12s} {c.get('name', ''):40s}  "
-            f"r={_fmt(c.get('rating'))}  "
-            f"d={_fmt(c.get('difficulty'))}  "
-            f"w={_fmt(c.get('workload'))}  "
-            f"n={c.get('reviewCount')}"
+            f"  {r.course_code:14s} {r.name[:40]:40s}  "
+            f"r={r.rating:.2f}  d={r.difficulty:.2f}  w={r.workload_hours_per_week:.2f}  n={r.review_count}"
         )
+
+    print()
+    for r in without[:3]:
+        print(f"  {r.course_code:14s} {r.name[:40]:40s}  (no reviews)")
