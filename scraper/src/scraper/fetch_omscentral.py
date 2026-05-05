@@ -1,29 +1,34 @@
-"""Fetch a single OMSCentral course page and print the response.
+"""Fetch raw HTML from OMSCentral's homepage.
 
-Diagnostic script to verify that OMSCentral returns server-rendered HTML
-containing the rating, difficulty, and workload values.
+Single function, single responsibility: do the HTTP request and return the
+response text. Parsing happens elsewhere (parse_omscentral.py). Keeping
+fetch and parse separate makes both testable in isolation — we can unit-test
+the parser by feeding it saved HTML, and unit-test the fetcher by mocking
+the HTTP layer.
 """
+
+from __future__ import annotations
 
 import httpx
 
-URL = "https://www.omscentral.com/"
+OMSCENTRAL_URL = "https://www.omscentral.com/"
 USER_AGENT = (
-    "omscs-radar/0.1 (diagnostic; +https://github.com/xqetsia/omscs-radar)"
+    "omscs-radar/0.1 (+https://github.com/xqetsia/omscs-radar)"
 )
+DEFAULT_TIMEOUT_SECONDS = 30.0
 
 
-def main() -> None:
-    headers = {"User-Agent": USER_AGENT}
-    response = httpx.get(URL, headers=headers, timeout=15.0)
+def fetch_homepage(*, timeout: float = DEFAULT_TIMEOUT_SECONDS) -> str:
+    """Fetch the OMSCentral homepage and return its HTML as a string.
 
-    print(f"Status: {response.status_code}")
-    print(f"Content-Type: {response.headers.get('content-type')}")
-    print(f"Body length: {len(response.text)} chars")
-    # Check whether the key data is in the HTML response
-    text = response.text
-    for marker in ["CS-7641", "Listed As", "rating", "difficulty", "hrs / week"]:
-        found = marker in text
-        print(f"Contains {marker!r}: {found}")
-
-if __name__ == "__main__":
-    main()
+    Raises:
+        httpx.HTTPStatusError: if the response is not 2xx.
+        httpx.RequestError: on network/transport errors.
+    """
+    response = httpx.get(
+        OMSCENTRAL_URL,
+        headers={"User-Agent": USER_AGENT},
+        timeout=timeout,
+    )
+    response.raise_for_status()
+    return response.text
