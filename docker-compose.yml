@@ -1,0 +1,28 @@
+# Local development infrastructure for omscs-radar.
+#
+# Spin up:    docker compose up -d
+# Tear down:  docker compose down
+# Logs:       docker compose logs -f
+# Wipe data:  docker compose down -v   (-v removes the volume, deleting all data)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: omscs-radar-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: omscs
+      POSTGRES_PASSWORD: omscs_dev
+      POSTGRES_DB: omscs_radar
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U omscs -d omscs_radar"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
