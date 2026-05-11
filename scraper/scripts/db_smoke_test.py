@@ -16,13 +16,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from sqlalchemy import select  # noqa: E402
 
-from scraper.db import SessionLocal, engine  # noqa: E402
-from scraper.db_models import Base, CourseSnapshot  # noqa: E402
+from scraper.db import SessionLocal  # noqa: E402
+from scraper.db_models import CourseSnapshot  # noqa: E402
 
 
 def main() -> None:
-    print("Creating tables (if not exist)...")
-    Base.metadata.create_all(bind=engine)
+   # Schema is managed by Alembic — run `alembic upgrade head` before this script.
 
     print("Inserting one snapshot...")
     with SessionLocal() as session:
