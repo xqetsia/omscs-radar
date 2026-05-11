@@ -14,7 +14,9 @@ dev = [
     "lxml>=5.2",
     "pydantic>=2.7",
     "typer>=0.12",
-    "structlog>=24.1"
+    "structlog>=24.1",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.2",
 ]
 
 # Expose our CLI as a real command
