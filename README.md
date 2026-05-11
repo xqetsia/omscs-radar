@@ -58,16 +58,11 @@ omscs-radar/
 
 ## Roadmap
 
-- [x] **Phase 1.1** — Project scaffold, modern Python tooling
-- [x] **Phase 1.2** — OMSCentral scraper (extracts data from Next.js RSC payload)
-- [x] **Phase 1.3** — Pydantic models with type-safe normalization
-- [x] **Phase 1.4** — Real CLI (`scrape-omscentral`) with structured logging
-- [ ] **Phase 1.5** — OMSHub scraper *(blocked by Vercel bot detection — see below)*
-- [ ] **Phase 1.6** — Merger combining both sources on course code
-- [ ] **Phase 2** — Postgres schema, SQLAlchemy models, Alembic migrations
-- [ ] **Phase 3** — FastAPI backend, deploy to Railway
+- [x] **Phase 1** — Python scraper (OMSCentral via Next.js RSC payload, typed Pydantic models, CLI with structured logging)
+- [x] **Phase 2** — Postgres schema, SQLAlchemy 2.0 models, Alembic migrations, scraper persists snapshots
+- [ ] **Phase 3** — FastAPI backend serving `/api/courses`, deployed to Railway
 - [ ] **Phase 4** — Chrome extension (Manifest V3, TypeScript)
-- [ ] **Phase 5** — GitHub Actions weekly cron, Chrome Web Store submission
+- [ ] **Phase 5** — GitHub Actions weekly cron, OMSHub scraper, Chrome Web Store submission
 
 ## Data sources
 
