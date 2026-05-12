@@ -11,6 +11,7 @@ from collections import defaultdict
 import structlog
 from fastapi import Depends, FastAPI, status
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -24,6 +25,18 @@ app = FastAPI(
     title="omscs-radar API",
     description="Serves community-sourced course ratings to the omscs-radar Chrome extension.",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    # Allow the OMSCS catalog page and any Chrome extension to call this API.
+    # The Chrome extension's origin is chrome-extension://<id>, but we don't
+    # know the ID ahead of time; allowing all origins is acceptable for a
+    # public, read-only API.
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["GET"],
+    allow_headers=["*"],
 )
 
 
