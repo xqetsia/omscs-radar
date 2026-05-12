@@ -22,7 +22,6 @@ from sqlalchemy.orm import sessionmaker
 # DATABASE_URL to connect somewhere else (a staging DB, prod, etc).
 DEFAULT_DATABASE_URL = "postgresql+psycopg://omscs:omscs_dev@localhost:5432/omscs_radar"
 
-
 def _normalize_url(raw_url: str) -> str:
     """Ensure the SQLAlchemy URL uses the psycopg driver explicitly.
 
@@ -36,10 +35,10 @@ def _normalize_url(raw_url: str) -> str:
     if raw_url.startswith("postgresql://"):
         return "postgresql+psycopg://" + raw_url[len("postgresql://") :]
     if raw_url.startswith("postgres://"):
-        # Some old configs use this short form (Heroku historically).
+        # Legacy Heroku-style short form. NB: must come *after* the postgresql
+        # check above because "postgresql://".startswith("postgres://") is True.
         return "postgresql+psycopg://" + raw_url[len("postgres://") :]
     return raw_url
-
 
 DATABASE_URL = _normalize_url(os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL))
 
