@@ -16,6 +16,7 @@ The official OMSCS catalog page lists ~60 courses but tells you nothing about wh
 
 ## Architecture
 
+<!-- ### Components 
 ```
   ┌────────────────────┐      ┌────────────────────┐
   │  OMSHub Scraper    │      │ OMSCentral Scraper │
@@ -42,7 +43,46 @@ The official OMSCS catalog page lists ~60 courses but tells you nothing about wh
                  │ Chrome Extension  │
                  │ (TypeScript, MV3) │
                  └───────────────────┘
-```
+
+``` -->
+
+### Data Flow
+┌──────────────────┐
+│   OMSCentral     │  (community data source)
+└────────┬─────────┘
+         │ HTTP fetch
+         ▼
+┌──────────────────┐
+│   Scraper        │  (Python, weekly cron)
+│   - extract RSC  │
+│   - parse        │
+│   - normalize    │
+└────────┬─────────┘
+         │ INSERT
+         ▼
+┌──────────────────┐
+│   PostgreSQL     │  (snapshot store)
+│   on Railway     │
+└────────┬─────────┘
+         │ SELECT (latest snapshot per course)
+         ▼
+┌──────────────────┐
+│   FastAPI        │  (read interface)
+│   /api/courses   │
+└────────┬─────────┘
+         │ HTTPS
+         ▼
+┌──────────────────┐
+│ Chrome extension │  (TypeScript, MV3)
+│   - find courses │
+│   - look up data │
+│   - inject badges│
+└────────┬─────────┘
+         │ DOM injection
+         ▼
+┌──────────────────┐
+│  GT catalog page │  (what the user sees)
+└──────────────────┘
 
 - **Scrapers** run weekly via GitHub Actions, collecting aggregate ratings.
 - **Normalizer** merges both sources on course code (`CS-XXXX`) and writes a new snapshot to Postgres — historical data is preserved so we can later show trends.
