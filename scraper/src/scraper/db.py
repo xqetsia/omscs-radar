@@ -7,7 +7,8 @@ pool.
 
 Connection URL comes from the DATABASE_URL env var. For local dev, set it
 in your shell or in scraper/.env (which is gitignored). For production
-deployment (Phase 3), the host environment provides it.
+deployment, the host environment provides it (e.g. Railway injects it
+automatically when this service references a Postgres service).
 """
 
 from __future__ import annotations
@@ -21,7 +22,26 @@ from sqlalchemy.orm import sessionmaker
 # DATABASE_URL to connect somewhere else (a staging DB, prod, etc).
 DEFAULT_DATABASE_URL = "postgresql+psycopg://omscs:omscs_dev@localhost:5432/omscs_radar"
 
-DATABASE_URL = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
+
+def _normalize_url(raw_url: str) -> str:
+    """Ensure the SQLAlchemy URL uses the psycopg driver explicitly.
+
+    Hosting platforms (Railway, Heroku, Render) typically inject DATABASE_URL
+    in the bare `postgresql://...` form. SQLAlchemy then defaults to psycopg2
+    if it's installed, otherwise errors out. We want psycopg (v3), so we
+    rewrite the scheme.
+    """
+    if raw_url.startswith("postgresql+"):
+        return raw_url  # already specifies a driver, leave it alone
+    if raw_url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + raw_url[len("postgresql://") :]
+    if raw_url.startswith("postgres://"):
+        # Some old configs use this short form (Heroku historically).
+        return "postgresql+psycopg://" + raw_url[len("postgres://") :]
+    return raw_url
+
+
+DATABASE_URL = _normalize_url(os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL))
 
 # echo=False because we don't want every SQL statement logged in production.
 # Flip to True (or set SQLALCHEMY_ECHO=1 below) when debugging.
