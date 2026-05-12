@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "omscs-radar",
+  "version": "0.1.0",
+  "description": "Overlays community ratings, difficulty, and workload on the Georgia Tech OMSCS course catalog.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://backend-production-3c97.up.railway.app/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://omscs.gatech.edu/current-courses*"],
+      "js": ["src/content/content-script.ts"],
+      "css": ["src/styles/badge.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "src/options/options.html"
+}
