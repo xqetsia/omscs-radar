@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Env / secrets
+.env
+.env.local
+
+# OS
+.DS_Store
+
+# Editors
+.idea/
+.vscode/
+
+# Build artifacts
+node_modules/
+dist/
+build/
+
+# Git
+.git/
+.gitignore
+
+# Scraper output
+data/
+
+# Local Docker config (don't ship dev DB into image)
+docker-compose.yml
