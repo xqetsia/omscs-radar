@@ -8,6 +8,12 @@ A Chrome extension that overlays community ratings, difficulty, and workload dir
 
 The official OMSCS catalog page lists ~60 courses but tells you nothing about what they're actually like. The community has built excellent review sites. A painpoint emerges because in order to use the review sites you have to leave the catalog, search each course, and context-switch constantly. omscs-radar surfaces aggregate ratings right next to each course on the official catalog, so you can scan the list and decide what to dig into.
 
+## Live URLs
+
+- **API docs (interactive):** https://backend-production-3c97.up.railway.app/docs
+- **Health check:** https://backend-production-3c97.up.railway.app/healthz
+- **Course data:** https://backend-production-3c97.up.railway.app/api/courses
+
 ## Architecture
 
 ```
@@ -60,7 +66,7 @@ omscs-radar/
 
 - [x] **Phase 1** — Python scraper (OMSCentral via Next.js RSC payload, typed Pydantic models, CLI with structured logging)
 - [x] **Phase 2** — Postgres schema, SQLAlchemy 2.0 models, Alembic migrations, scraper persists snapshots
-- [ ] **Phase 3** — FastAPI backend serving `/api/courses`, deployed to Railway
+- [x] **Phase 3** — FastAPI backend serving `/api/courses`, deployed to Railway
 - [ ] **Phase 4** — Chrome extension (Manifest V3, TypeScript)
 - [ ] **Phase 5** — GitHub Actions weekly cron, OMSHub scraper, Chrome Web Store submission
 
