@@ -1,12 +1,17 @@
 {
   "manifest_version": 3,
   "name": "Georgia Tech OMSCS Radar",
-  "version": "0.1.0",
-  "description": "Overlays community ratings, difficulty, and workload on the Georgia Tech OMSCS course catalog.",
+  "version": "0.2.0",
+  "description": "See community ratings, difficulty, and workload right on the Georgia Tech OMSCS course catalog.",
   "permissions": ["storage"],
   "host_permissions": [
     "https://backend-production-3c97.up.railway.app/*"
   ],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "content_scripts": [
     {
       "matches": ["https://omscs.gatech.edu/current-courses*"],
@@ -17,6 +22,11 @@
   ],
   "action": {
     "default_title": "Georgia Tech OMSCS Radar",
-    "default_popup": "src/popup/popup.html"
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
   }
 }
