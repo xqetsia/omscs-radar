@@ -64,7 +64,15 @@ async function main(): Promise<void> {
     const badge = renderBadge(source);
     if (badge === null) continue;
 
-    c.element.insertAdjacentElement("afterend", badge);
+    // Place the badge at the end of the <li> so it appears under the *entire*
+    // course line — past any "(formerly CS 8803 ...)" annotation that may
+    // follow the course title.
+    const wrapper = document.createElement("div");
+    wrapper.className = "omscs-radar-badge-wrap";
+    wrapper.append(badge);
+    const listItem = c.element.closest("li");
+    (listItem ?? c.element).append(wrapper);
+
     injectedCount++;
   }
 

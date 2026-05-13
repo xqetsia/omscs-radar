@@ -1,2 +1,64 @@
-/* Styles for omscs-radar rating badges injected next to courses on the OMSCS catalog page.
-   Will be filled in step 4.5. */
+/* ===========================================================================
+   omscs-radar badge styles.
+
+   All selectors are namespaced with `omscs-radar-` to avoid colliding with
+   the host page's CSS. We use `all: revert` on the root containers to
+   reset any inherited styles from GT's stylesheet before applying our own.
+   =========================================================================== */
+
+.omscs-radar-badge-wrap {
+  /* Wrapper that places the badge on its own line under the course link.
+     Reset everything first, then apply our own block layout. */
+  all: revert;
+  display: block;
+  margin: 4px 0 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1;
+}
+
+.omscs-radar-badge {
+  /* Outlined pill in Georgia Tech gold — echoes the page's link underlines
+     so the badge feels like a native part of the GT catalog. */
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid #b3a369;       /* GT Tech Gold */
+  background-color: #fdfaf2;       /* very faint warm cream */
+  font-size: 12px;
+  color: #555;
+}
+
+.omscs-radar-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.omscs-radar-label {
+  font-weight: 400;
+}
+
+.omscs-radar-value {
+  font-weight: 600;
+  color: #333;
+}
+
+.omscs-radar-sep {
+  color: #c8b5a8;
+  font-weight: 300;
+}
+
+.omscs-radar-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Severity colors — calibrated to feel similar in saturation/weight so no
+   one stands out unnaturally. */
+.omscs-radar-dot--good { background-color: #4caf50; } /* green */
+.omscs-radar-dot--ok   { background-color: #f4b400; } /* yellow */
+.omscs-radar-dot--bad  { background-color: #e34c4c; } /* red */
