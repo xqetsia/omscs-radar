@@ -7,6 +7,7 @@
  */
 
 import { fetchCourses, indexByCourseCode } from "../lib/api";
+import { getPreferredSource } from "../lib/storage";
 import { renderBadge } from "./badge";
 
 console.log("[omscs-radar] content script loaded");
@@ -49,16 +50,14 @@ async function main(): Promise<void> {
   }
 
   const byCode = indexByCourseCode(apiData);
+  const preferredSource = await getPreferredSource();
 
   let injectedCount = 0;
   for (const c of courses) {
     const apiCourse = byCode.get(c.courseCode);
     if (apiCourse === undefined) continue;
 
-    // For now, hardcode OMSCentral as the source. Step 4.6 adds a user
-    // preference that lets them choose. The shape of this code stays the
-    // same — just replace "omscentral" with a value read from chrome.storage.
-    const source = apiCourse.sources["omscentral"];
+    const source = apiCourse.sources[preferredSource];
     if (source === undefined) continue;
 
     const badge = renderBadge(source);
