@@ -2,57 +2,83 @@
  * Content script for omscs-radar.
  *
  * Runs on https://omscs.gatech.edu/current-courses when the user visits the
- * catalog. Currently a hello-world: finds every course link on the page,
- * extracts the course code, and logs the list to the page's console.
+ * catalog. Discovers every course link, fetches ratings from the omscs-radar
+ * API, and (in the next step) injects rating badges next to each course.
  *
- * Next step (4.3): replace logging with a fetch to the omscs-radar API.
+ * For now: logs the matched data for each course to the console.
  */
+
+import { fetchCourses, indexByCourseCode } from "../lib/api";
 
 console.log("[omscs-radar] content script loaded");
 
-/** A course discovered on the OMSCS catalog page. */
 interface DiscoveredCourse {
-  /** The raw text from the link, e.g. "CS 6035: Introduction to Information Security". */
   rawText: string;
-  /** The normalized course code in the API's format, e.g. "CS-6035". */
   courseCode: string;
-  /** The DOM element so we can later inject a badge next to it. */
   element: HTMLAnchorElement;
 }
 
-/**
- * Convert a course code as displayed on the GT page ("CS 6035") to the
- * canonical form used everywhere else in omscs-radar ("CS-6035").
- * Returns null if the input doesn't look like a course code.
- */
 function normalizeCourseCode(rawText: string): string | null {
-  // Match patterns like "CS 6035", "CSE 6242", "PUBP 8823", possibly followed
-  // by ":" or "—" or the course name. We anchor at the start of the string.
-  const match = rawText.match(/^([A-Z]{2,4})\s+(\d{4})/);
+  // Match patterns like:
+  //   "CS 6035: Introduction..."   -> CS-6035
+  //   "CS 8803 O11: Quantum..."     -> CS-8803-O11
+  //   "CSE 8803 AA1: ..."           -> CSE-8803-AA1
+  //
+  // The optional (\s+([A-Z0-9]{2,4}))? captures a section suffix that's
+  // separated by whitespace from the course number (the format GT uses on
+  // their catalog).
+  const match = rawText.match(/^([A-Z]{2,4})\s+(\d{4})(?:\s+([A-Z0-9]{2,4}))?/);
   if (!match) return null;
-  const [, subject, number] = match;
-  return `${subject}-${number}`;
+  const [, subject, number, suffix] = match;
+  return suffix ? `${subject}-${number}-${suffix}` : `${subject}-${number}`;
 }
 
-/**
- * Scan the page DOM for every course link and return what we found.
- */
 function discoverCourses(): DiscoveredCourse[] {
-  // Courses live in <li><a href="/cs-XXXX-...">CS XXXX: ...</a></li> structure.
-  // We anchor on the anchor element rather than the <li> so we have the link
-  // to inject the badge next to later.
   const anchors = document.querySelectorAll<HTMLAnchorElement>("li > a[href^='/']");
-
   const discovered: DiscoveredCourse[] = [];
   for (const anchor of anchors) {
     const rawText = anchor.textContent?.trim() ?? "";
     const courseCode = normalizeCourseCode(rawText);
-    if (courseCode === null) continue; // not a course link (e.g. nav link)
+    if (courseCode === null) continue;
     discovered.push({ rawText, courseCode, element: anchor });
   }
   return discovered;
 }
 
-const courses = discoverCourses();
-console.log(`[omscs-radar] discovered ${courses.length} courses:`);
-console.table(courses.map((c) => ({ code: c.courseCode, name: c.rawText })));
+async function main(): Promise<void> {
+  const courses = discoverCourses();
+  console.log(`[omscs-radar] discovered ${courses.length} courses on the page`);
+
+  let apiData;
+  try {
+    apiData = await fetchCourses();
+  } catch (error) {
+    console.error("[omscs-radar] failed to fetch course data:", error);
+    return;
+  }
+  console.log(`[omscs-radar] fetched ${apiData.length} courses from the API`);
+
+  const byCode = indexByCourseCode(apiData);
+
+  // Log how many of the page's courses we have data for.
+  const matched: { code: string; rating: number | null }[] = [];
+  const unmatched: string[] = [];
+
+  for (const c of courses) {
+    const apiCourse = byCode.get(c.courseCode);
+    if (apiCourse === undefined) {
+      unmatched.push(c.courseCode);
+      continue;
+    }
+    const omscentral = apiCourse.sources["omscentral"];
+    matched.push({ code: c.courseCode, rating: omscentral?.rating ?? null });
+  }
+
+  console.log(`[omscs-radar] ${matched.length} matched, ${unmatched.length} unmatched`);
+  console.table(matched);
+  if (unmatched.length > 0) {
+    console.log("[omscs-radar] unmatched course codes:", unmatched);
+  }
+}
+
+main();
