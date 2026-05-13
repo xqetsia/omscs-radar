@@ -1,14 +1,13 @@
 /**
  * Content script for omscs-radar.
  *
- * Runs on https://omscs.gatech.edu/current-courses when the user visits the
- * catalog. Discovers every course link, fetches ratings from the omscs-radar
- * API, and (in the next step) injects rating badges next to each course.
- *
- * For now: logs the matched data for each course to the console.
+ * Runs on https://omscs.gatech.edu/current-courses. Discovers every course
+ * link on the page, fetches the corresponding ratings from the omscs-radar
+ * API, and injects a rating badge next to each matched course link.
  */
 
 import { fetchCourses, indexByCourseCode } from "../lib/api";
+import { renderBadge } from "./badge";
 
 console.log("[omscs-radar] content script loaded");
 
@@ -19,14 +18,6 @@ interface DiscoveredCourse {
 }
 
 function normalizeCourseCode(rawText: string): string | null {
-  // Match patterns like:
-  //   "CS 6035: Introduction..."   -> CS-6035
-  //   "CS 8803 O11: Quantum..."     -> CS-8803-O11
-  //   "CSE 8803 AA1: ..."           -> CSE-8803-AA1
-  //
-  // The optional (\s+([A-Z0-9]{2,4}))? captures a section suffix that's
-  // separated by whitespace from the course number (the format GT uses on
-  // their catalog).
   const match = rawText.match(/^([A-Z]{2,4})\s+(\d{4})(?:\s+([A-Z0-9]{2,4}))?/);
   if (!match) return null;
   const [, subject, number, suffix] = match;
@@ -56,29 +47,28 @@ async function main(): Promise<void> {
     console.error("[omscs-radar] failed to fetch course data:", error);
     return;
   }
-  console.log(`[omscs-radar] fetched ${apiData.length} courses from the API`);
 
   const byCode = indexByCourseCode(apiData);
 
-  // Log how many of the page's courses we have data for.
-  const matched: { code: string; rating: number | null }[] = [];
-  const unmatched: string[] = [];
-
+  let injectedCount = 0;
   for (const c of courses) {
     const apiCourse = byCode.get(c.courseCode);
-    if (apiCourse === undefined) {
-      unmatched.push(c.courseCode);
-      continue;
-    }
-    const omscentral = apiCourse.sources["omscentral"];
-    matched.push({ code: c.courseCode, rating: omscentral?.rating ?? null });
+    if (apiCourse === undefined) continue;
+
+    // For now, hardcode OMSCentral as the source. Step 4.6 adds a user
+    // preference that lets them choose. The shape of this code stays the
+    // same — just replace "omscentral" with a value read from chrome.storage.
+    const source = apiCourse.sources["omscentral"];
+    if (source === undefined) continue;
+
+    const badge = renderBadge(source);
+    if (badge === null) continue;
+
+    c.element.insertAdjacentElement("afterend", badge);
+    injectedCount++;
   }
 
-  console.log(`[omscs-radar] ${matched.length} matched, ${unmatched.length} unmatched`);
-  console.table(matched);
-  if (unmatched.length > 0) {
-    console.log("[omscs-radar] unmatched course codes:", unmatched);
-  }
+  console.log(`[omscs-radar] injected ${injectedCount} badges`);
 }
 
 main();
