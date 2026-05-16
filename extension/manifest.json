@@ -5,7 +5,8 @@
   "description": "See community ratings, difficulty, and workload right on the Georgia Tech OMSCS course catalog.",
   "permissions": ["storage"],
   "host_permissions": [
-    "https://backend-production-3c97.up.railway.app/*"
+    "https://backend-production-3c97.up.railway.app/*",
+      "https://omscs.gatech.edu/*"
   ],
   "icons": {
     "16": "icons/icon-16.png",
