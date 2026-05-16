@@ -3,7 +3,7 @@
  *
  * Builds a DOM element shown below each course on the OMSCS catalog
  * displaying rating, difficulty, and workload from one source. Each stat
- * has a colored dot indicating severity (green = pleasant, red = brutal),
+ * has a visual indicator of severity (green = pleasant, red = brutal),
  * so a user scanning the catalog can spot easy/hard courses at a glance.
  *
  * The thresholds for severity are calibrated to OMSCS norms — most courses
@@ -28,8 +28,13 @@ function severityLowerBetter(value: number, low: number, high: number): Severity
   return "bad";
 }
 
+const DIFFICULTY_LABEL: Record<Severity, string> = {
+  good: "EASY",
+  ok: "MEDIUM",
+  bad: "HARD",
+};
+
 export function renderBadge(source: CourseSourceData): HTMLSpanElement | null {
-  // Skip empty courses entirely.
   if (
     source.rating === null
     && source.difficulty === null
@@ -41,55 +46,76 @@ export function renderBadge(source: CourseSourceData): HTMLSpanElement | null {
   const container = document.createElement("span");
   container.className = "omscs-radar-badge";
 
-  appendStat(container, {
-    label: "rating",
-    value: source.rating,
-    severity: source.rating !== null
-      ? severityHigherBetter(source.rating, 2.5, 3.5)
-      : null,
-    decimals: 1,
-  });
-  appendStat(container, {
-    label: "difficulty",
-    value: source.difficulty,
-    severity: source.difficulty !== null
-      ? severityLowerBetter(source.difficulty, 2.5, 3.5)
-      : null,
-    decimals: 1,
-  });
-  appendStat(container, {
-    label: "workload",
-    value: source.workload_hours_per_week,
-    severity: source.workload_hours_per_week !== null
-      ? severityLowerBetter(source.workload_hours_per_week, 10, 15)
-      : null,
-    decimals: 1,
-    suffix: "/wk",
-  });
+  if (source.rating !== null) {
+    appendRatingStat(container, source.rating);
+  }
+  if (source.difficulty !== null) {
+    appendDifficultyStat(container, source.difficulty);
+  }
+  if (source.workload_hours_per_week !== null) {
+    appendStat(container, {
+      label: "workload",
+      value: source.workload_hours_per_week,
+      severity: severityLowerBetter(source.workload_hours_per_week, 11.9, 19),
+      decimals: 1,
+      suffix: "/wk",
+    });
+  }
 
   return container;
+}
+
+function appendRatingStat(container: HTMLSpanElement, rating: number): void {
+  const severity = severityHigherBetter(rating, 2.5, 3.5);
+
+  maybeSep(container);
+
+  const stat = document.createElement("span");
+  stat.className = "omscs-radar-stat";
+
+  const label = document.createElement("span");
+  label.className = "omscs-radar-label";
+  label.textContent = "rating";
+
+  const chip = document.createElement("span");
+  chip.className = `omscs-radar-rating-chip omscs-radar-rating-chip--${severity}`;
+  chip.textContent = rating.toFixed(1);
+
+  stat.append(label, chip);
+  container.append(stat);
+}
+
+function appendDifficultyStat(container: HTMLSpanElement, difficulty: number): void {
+  const severity = severityLowerBetter(difficulty, 2.5, 4);
+
+  maybeSep(container);
+
+  const stat = document.createElement("span");
+  stat.className = "omscs-radar-stat";
+
+  const label = document.createElement("span");
+  label.className = "omscs-radar-label";
+  label.textContent = "difficulty";
+
+  const diffLabel = document.createElement("span");
+  diffLabel.className = `omscs-radar-difficulty omscs-radar-difficulty--${severity}`;
+  diffLabel.textContent = DIFFICULTY_LABEL[severity];
+
+  stat.append(label, diffLabel);
+  container.append(stat);
 }
 
 function appendStat(
   container: HTMLSpanElement,
   options: {
     label: string;
-    value: number | null;
-    severity: Severity | null;
+    value: number;
+    severity: Severity;
     decimals: number;
     suffix?: string;
   },
 ): void {
-  if (options.value === null || options.severity === null) return;
-
-  // Visual separator between stats. Skipped on the first stat by checking
-  // whether the container already has children.
-  if (container.childElementCount > 0) {
-    const sep = document.createElement("span");
-    sep.className = "omscs-radar-sep";
-    sep.textContent = "|";
-    container.append(sep);
-  }
+  maybeSep(container);
 
   const stat = document.createElement("span");
   stat.className = "omscs-radar-stat";
@@ -107,4 +133,14 @@ function appendStat(
 
   stat.append(dot, label, value);
   container.append(stat);
+}
+
+/** Inserts a "|" separator if the container already has children. */
+function maybeSep(container: HTMLSpanElement): void {
+  if (container.childElementCount > 0) {
+    const sep = document.createElement("span");
+    sep.className = "omscs-radar-sep";
+    sep.textContent = "|";
+    container.append(sep);
+  }
 }

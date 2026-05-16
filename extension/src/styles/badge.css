@@ -57,8 +57,43 @@
   border-radius: 50%;
 }
 
-/* Severity colors — calibrated to feel similar in saturation/weight so no
-   one stands out unnaturally. */
+/* Dot — background-color is correct, it's a solid circle. */
 .omscs-radar-dot--good { background-color: #4caf50; } /* green */
 .omscs-radar-dot--ok   { background-color: #f4b400; } /* yellow */
 .omscs-radar-dot--bad  { background-color: #e34c4c; } /* red */
+
+
+/* Difficulty pill chip */
+.omscs-radar-difficulty {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.omscs-radar-difficulty--good {
+  color: #2e7d32;
+  background-color: #e8f5e9;
+}
+.omscs-radar-difficulty--ok {
+  color: #b8860b;
+  background-color: #fef9e7;
+}
+.omscs-radar-difficulty--bad {
+  color: #c62828;
+  background-color: #fdecea;
+}
+
+/* Rating chip — number on a colored background. */
+.omscs-radar-rating-chip {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.omscs-radar-rating-chip--good { background-color: #4caf50; }
+.omscs-radar-rating-chip--ok   { background-color: #f4b400; }
+.omscs-radar-rating-chip--bad  { background-color: #e34c4c; }
