@@ -25,6 +25,9 @@ export function createPanel(): HTMLDivElement {
     display: none;
     z-index: 9999;
     font-family: sans-serif;
+    box-sizing: border-box;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
   `;
   document.body.appendChild(panel);
 
@@ -88,6 +91,10 @@ export function createPanel(): HTMLDivElement {
   `;
 
   document.head.appendChild(style); 
+
+    panel.addEventListener("mouseleave", () => {
+    panel.style.display = "none";
+  });
   return panel; 
 }
 
@@ -98,6 +105,8 @@ export function attachHoverListeners(
   byCode: Map<string, CourseResponse>, 
   preferredSource: string
 ): void {
+  let hideTimeout: ReturnType<typeof setTimeout> | null = null;
+
   const courseLinks = document.querySelectorAll<HTMLAnchorElement>(
     'a[href^="/cs-"]'
   );
@@ -105,61 +114,94 @@ export function attachHoverListeners(
   console.log(`omscs-radar: found ${courseLinks.length} course links`);
 
   courseLinks.forEach((link) => {
- link.addEventListener("mouseenter", async () => {
-  const linkRect = link.getBoundingClientRect();
-  panel.style.top = `${linkRect.top}px`;
-  panel.style.left = `${linkRect.right + 80}px`;
-  panel.style.display = "block";
-  panel.innerHTML = "<p>Loading...</p>";
+    link.addEventListener("mouseenter", async () => {
 
-  // Match the hovered link to its discovered course to get the course code.
-  // Then look up the API data and extract the rating for the preferred source.
-  const discovered = courses.find((c) => c.element === link);
-  const apiCourse = discovered ? byCode.get(discovered.courseCode) : undefined;
-  const source = apiCourse?.sources[preferredSource];
-  const rating = source?.rating ?? null;
+      // Cancel any pending hide so the panel doesn't disappear when quickly
+      // moving from one course link to another.
+      if (hideTimeout) {
+        clearTimeout(hideTimeout);
+        hideTimeout = null;
+      }
 
-  const overview = await fetchCourseOverview(link.getAttribute("href")!);
+      const linkRect = link.getBoundingClientRect();
+      panel.style.top = `${linkRect.top}px`;
+      panel.style.left = `${linkRect.right + 24}px`;
+      panel.style.display = "block";
+      panel.innerHTML = "<p>Loading...</p>";
 
-  const ratingHTML = rating !== null
-    ? `<span class="omscs-radar-panel-rating" style="background:${ratingColor(rating)}">${rating.toFixed(1)}</span>`
-    : "";
+      const discovered = courses.find((c) => c.element === link);
+      const apiCourse = discovered ? byCode.get(discovered.courseCode) : undefined;
+      const source = apiCourse?.sources[preferredSource];
+      const rating = source?.rating ?? null;
 
-  panel.innerHTML = `
-    <div class="omscs-radar-panel-header">
-      <div class="omscs-radar-panel-top">
-        <span class="omscs-radar-panel-code">${discovered?.courseCode ?? ""}</span>
-        <div class="omscs-radar-panel-rating-group">
-          <span class="omscs-radar-panel-rating-label">Overall rating</span>
-          ${ratingHTML}
+      const overview = await fetchCourseOverview(link.getAttribute("href")!);
+
+      const ratingHTML = rating !== null
+        ? `<span class="omscs-radar-panel-rating" style="background:${ratingColor(rating)}">${rating.toFixed(1)}</span>`
+        : "";
+
+      panel.innerHTML = `
+        <div class="omscs-radar-panel-header">
+          <div class="omscs-radar-panel-top">
+            <span class="omscs-radar-panel-code">${discovered?.courseCode ?? ""}</span>
+            <div class="omscs-radar-panel-rating-group">
+              <span class="omscs-radar-panel-rating-label">Overall rating</span>
+              ${ratingHTML}
+            </div>
+          </div>
+          <div class="omscs-radar-panel-title">${link.textContent?.trim().replace(/^[A-Z]{2,4}\s+\d{4}:\s*/, "") ?? ""}</div>
         </div>
-      </div>
-      <div class="omscs-radar-panel-title">${link.textContent?.trim().replace(/^[A-Z]{2,4}\s+\d{4}:\s*/, "") ?? ""}</div>
-    </div>
-    <hr class="omscs-radar-panel-divider" />
-    ${overview}
-  `;
-});
+        <hr class="omscs-radar-panel-divider" />
+        ${overview}
+      `;
+    // After populating the panel, check if it overflows the viewport bottom.
+    // If so, flip to bottom-anchored. Clamp to viewport top as a fallback.
+    const panelRect = panel.getBoundingClientRect();
+    if (panelRect.bottom > window.innerHeight) {
+      const newTop = linkRect.bottom - panel.offsetHeight;
+      panel.style.top = `${Math.max(8, newTop)}px`;
+    }
+    });
 
     link.addEventListener("mouseleave", () => {
-      panel.style.display = "none";
+      hideTimeout = setTimeout(() => {
+        if (!panel.matches(":hover")) {
+          panel.style.display = "none";
+        }
+      }, 500);
     });
+
   });
+ 
 }
 
 async function fetchCourseOverview(href: string): Promise<string> {
   const url = `https://omscs.gatech.edu${href}`;
-  const response = await fetch(url);
+  // Mimic a real browser request so GT's server returns the full rendered HTML
+  // rather than a stripped version served to non-browser clients.
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    }
+  });
   const html = await response.text();
 
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
 
-  const body = doc.querySelector(".field--name-body");
-  if (!body) return "<p>No overview available.</p>";
+  // Find the .field--name-body div that contains an <h4> with text "Overview".
+  // Multiple divs share this class (e.g. Instructional Team), so we need the right one.
+  const allBodies = doc.querySelectorAll(".field--name-body");
+  const overviewBody = Array.from(allBodies).find(
+    (el) => el.querySelector("h4")?.textContent?.trim() === "Overview"
+  );
 
-  // Remove the <h4>Overview</h4> heading since we'll add our own
-  body.querySelector("h4")?.remove();
+  if (!overviewBody) return "<p>No overview available.</p>";
 
-  return body.innerHTML.trim();
+  // Grab all sibling elements after the <h4> heading.
+  const h4 = overviewBody.querySelector("h4");
+  h4?.remove();
+
+  return overviewBody.innerHTML.trim();
 }
