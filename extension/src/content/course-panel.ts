@@ -1,15 +1,22 @@
 import { CourseResponse } from "../lib/api";
 import { DiscoveredCourse } from "../lib/types";
 
+function ratingColor(rating: number): string {
+  if (rating >= 3.5) return "#4caf50";
+  if (rating >= 2.5) return "#f4b400";
+  return "#e34c4c";
+}
+
 const PANEL_ID = "omscs-radar-course-panel";
 
 export function createPanel(): HTMLDivElement {
   const panel = document.createElement("div");
   panel.id = PANEL_ID;
+
   panel.style.cssText = `
     position: fixed;
     top: 270px;
-    left: 1120px;
+    left: 1120px; 
     width: 420px;
     background: white;
     border: 1px solid #d4af37;
@@ -37,7 +44,7 @@ export function createPanel(): HTMLDivElement {
   .omscs-radar-panel-header {
     margin-bottom: 8px;
   }
-.omscs-radar-panel-top {
+  .omscs-radar-panel-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -63,7 +70,6 @@ export function createPanel(): HTMLDivElement {
     color: #666;
   }
   .omscs-radar-panel-rating {
-    background: #2e7d32;
     color: white;
     font-size: 12px;
     font-weight: 700;
@@ -82,10 +88,10 @@ export function createPanel(): HTMLDivElement {
   }
   `;
 
-  document.head.appendChild(style);
-
-  return panel;
+  document.head.appendChild(style); 
+  return panel; 
 }
+
 
 export function attachHoverListeners(
   panel: HTMLDivElement, 
@@ -112,7 +118,7 @@ export function attachHoverListeners(
     const overview = await fetchCourseOverview(link.getAttribute("href")!);
 
     const ratingHTML = rating !== null
-      ? `<span class="omscs-radar-panel-rating">${rating.toFixed(1)}</span>`
+      ? `<span class="omscs-radar-panel-rating" style="background:${ratingColor(rating)}">${rating.toFixed(1)}</span>`
       : "";
 
     panel.innerHTML = `
