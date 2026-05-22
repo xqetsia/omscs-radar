@@ -1,3 +1,6 @@
+import { CourseResponse } from "../lib/api";
+import { DiscoveredCourse } from "../lib/types";
+
 const PANEL_ID = "omscs-radar-course-panel";
 
 export function createPanel(): HTMLDivElement {
@@ -5,9 +8,9 @@ export function createPanel(): HTMLDivElement {
   panel.id = PANEL_ID;
   panel.style.cssText = `
     position: fixed;
-    top: 120px;
-    right: 24px;
-    width: 320px;
+    top: 270px;
+    left: 1120px;
+    width: 420px;
     background: white;
     border: 1px solid #d4af37;
     border-radius: 8px;
@@ -30,6 +33,53 @@ export function createPanel(): HTMLDivElement {
     #omscs-radar-course-panel li::marker {
       color: #A4925A;
     }
+    
+  .omscs-radar-panel-header {
+    margin-bottom: 8px;
+  }
+.omscs-radar-panel-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .omscs-radar-panel-code {
+    background: #A4925A;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .omscs-radar-panel-rating-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+  .omscs-radar-panel-rating-label {
+    font-size: 12px;
+    color: #666;
+  }
+  .omscs-radar-panel-rating {
+    background: #2e7d32;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .omscs-radar-panel-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #262626;
+  }
+  .omscs-radar-panel-divider {
+    border: none;
+    border-top: 2px solid #A4925A;
+    margin: 10px 0;
+  }
   `;
 
   document.head.appendChild(style);
@@ -37,7 +87,12 @@ export function createPanel(): HTMLDivElement {
   return panel;
 }
 
-export function attachHoverListeners(panel: HTMLDivElement): void {
+export function attachHoverListeners(
+  panel: HTMLDivElement, 
+  courses: DiscoveredCourse[], 
+  byCode: Map<string, CourseResponse>, 
+  preferredSource: string
+): void {
   const courseLinks = document.querySelectorAll<HTMLAnchorElement>(
     'a[href^="/cs-"]'
   );
@@ -45,13 +100,36 @@ export function attachHoverListeners(panel: HTMLDivElement): void {
   console.log(`omscs-radar: found ${courseLinks.length} course links`);
 
   courseLinks.forEach((link) => {
-    link.addEventListener("mouseenter", async () => {
-        panel.style.display = "block";
-        panel.innerHTML = "<p>Loading...</p>"; 
+  link.addEventListener("mouseenter", async () => {
+    panel.style.display = "block";
+    panel.innerHTML = "<p>Loading...</p>";
 
-        const overview = await fetchCourseOverview(link.getAttribute("href")!);
-        panel.innerHTML = overview;
-    });
+    const discovered = courses.find((c) => c.element === link);
+    const apiCourse = discovered ? byCode.get(discovered.courseCode) : undefined;
+    const source = apiCourse?.sources[preferredSource];
+    const rating = source?.rating ?? null;
+
+    const overview = await fetchCourseOverview(link.getAttribute("href")!);
+
+    const ratingHTML = rating !== null
+      ? `<span class="omscs-radar-panel-rating">${rating.toFixed(1)}</span>`
+      : "";
+
+    panel.innerHTML = `
+        <div class="omscs-radar-panel-header">
+          <div class="omscs-radar-panel-top">
+            <span class="omscs-radar-panel-code">${discovered?.courseCode ?? ""}</span>
+            <div class="omscs-radar-panel-rating-group">
+              <span class="omscs-radar-panel-rating-label">Overall rating</span>
+              ${ratingHTML}
+            </div>
+          </div>
+          <div class="omscs-radar-panel-title">${link.textContent?.trim().replace(/^[A-Z]{2,4}\s+\d{4}:\s*/, "") ?? ""}</div>
+        </div>
+        <hr class="omscs-radar-panel-divider" />
+        ${overview}
+      `;
+  });
 
     link.addEventListener("mouseleave", () => {
       panel.style.display = "none";

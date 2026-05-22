@@ -9,14 +9,11 @@
 import { fetchCourses, indexByCourseCode } from "../lib/api";
 import { getPreferredSource } from "../lib/storage";
 import { renderBadge } from "./badge";
+import { createPanel, attachHoverListeners } from "./course-panel";
+import { DiscoveredCourse } from "../lib/types";
 
 console.log("[omscs-radar] content script loaded");
 
-interface DiscoveredCourse {
-  rawText: string;
-  courseCode: string;
-  element: HTMLAnchorElement;
-}
 
 function normalizeCourseCode(rawText: string): string | null {
   const match = rawText.match(/^([A-Z]{2,4})\s+(\d{4})(?:\s+([A-Z0-9]{2,4}))?/);
@@ -76,6 +73,12 @@ async function main(): Promise<void> {
   }
 
   console.log(`[omscs-radar] injected ${injectedCount} badges`);
+
+  const panel = createPanel();
+  console.log("omscs-radar panel injected:", panel.id);
+
+  attachHoverListeners(panel, courses, byCode, preferredSource);
+
 }
 
 main();
