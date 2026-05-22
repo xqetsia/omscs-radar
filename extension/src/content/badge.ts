@@ -52,14 +52,10 @@ export function renderBadge(source: CourseSourceData): HTMLSpanElement | null {
   if (source.difficulty !== null) {
     appendDifficultyStat(container, source.difficulty);
   }
+
   if (source.workload_hours_per_week !== null) {
-    appendStat(container, {
-      label: "workload",
-      value: source.workload_hours_per_week,
-      severity: severityLowerBetter(source.workload_hours_per_week, 11.9, 19),
-      decimals: 1,
-      suffix: "/wk",
-    });
+    const severity = severityLowerBetter(source.workload_hours_per_week, 11.9, 19);
+    appendWorkloadStat(container, source.workload_hours_per_week, severity);
   }
 
   return container;
@@ -102,6 +98,24 @@ function appendDifficultyStat(container: HTMLSpanElement, difficulty: number): v
   diffLabel.textContent = DIFFICULTY_LABEL[severity];
 
   stat.append(label, diffLabel);
+  container.append(stat);
+}
+
+function appendWorkloadStat(container: HTMLSpanElement, workload: number, severity: Severity): void {
+  maybeSep(container);
+
+  const stat = document.createElement("span");
+  stat.className = "omscs-radar-stat";
+
+  const label = document.createElement("span");
+  label.className = "omscs-radar-label";
+  label.textContent = "workload";
+
+  const chip = document.createElement("span");
+  chip.className = `omscs-radar-workload-chip omscs-radar-workload-chip--${severity}`;
+  chip.textContent = `${workload.toFixed(1)}/wk`;
+
+  stat.append(label, chip);
   container.append(stat);
 }
 
