@@ -15,7 +15,6 @@ export function createPanel(): HTMLDivElement {
 
   panel.style.cssText = `
     position: fixed;
-    top: 270px;
     left: 1120px; 
     width: 420px;
     background: white;
@@ -106,36 +105,41 @@ export function attachHoverListeners(
   console.log(`omscs-radar: found ${courseLinks.length} course links`);
 
   courseLinks.forEach((link) => {
-  link.addEventListener("mouseenter", async () => {
-    panel.style.display = "block";
-    panel.innerHTML = "<p>Loading...</p>";
+ link.addEventListener("mouseenter", async () => {
+  const linkRect = link.getBoundingClientRect();
+  panel.style.top = `${linkRect.top}px`;
+  panel.style.left = `${linkRect.right + 80}px`;
+  panel.style.display = "block";
+  panel.innerHTML = "<p>Loading...</p>";
 
-    const discovered = courses.find((c) => c.element === link);
-    const apiCourse = discovered ? byCode.get(discovered.courseCode) : undefined;
-    const source = apiCourse?.sources[preferredSource];
-    const rating = source?.rating ?? null;
+  // Match the hovered link to its discovered course to get the course code.
+  // Then look up the API data and extract the rating for the preferred source.
+  const discovered = courses.find((c) => c.element === link);
+  const apiCourse = discovered ? byCode.get(discovered.courseCode) : undefined;
+  const source = apiCourse?.sources[preferredSource];
+  const rating = source?.rating ?? null;
 
-    const overview = await fetchCourseOverview(link.getAttribute("href")!);
+  const overview = await fetchCourseOverview(link.getAttribute("href")!);
 
-    const ratingHTML = rating !== null
-      ? `<span class="omscs-radar-panel-rating" style="background:${ratingColor(rating)}">${rating.toFixed(1)}</span>`
-      : "";
+  const ratingHTML = rating !== null
+    ? `<span class="omscs-radar-panel-rating" style="background:${ratingColor(rating)}">${rating.toFixed(1)}</span>`
+    : "";
 
-    panel.innerHTML = `
-        <div class="omscs-radar-panel-header">
-          <div class="omscs-radar-panel-top">
-            <span class="omscs-radar-panel-code">${discovered?.courseCode ?? ""}</span>
-            <div class="omscs-radar-panel-rating-group">
-              <span class="omscs-radar-panel-rating-label">Overall rating</span>
-              ${ratingHTML}
-            </div>
-          </div>
-          <div class="omscs-radar-panel-title">${link.textContent?.trim().replace(/^[A-Z]{2,4}\s+\d{4}:\s*/, "") ?? ""}</div>
+  panel.innerHTML = `
+    <div class="omscs-radar-panel-header">
+      <div class="omscs-radar-panel-top">
+        <span class="omscs-radar-panel-code">${discovered?.courseCode ?? ""}</span>
+        <div class="omscs-radar-panel-rating-group">
+          <span class="omscs-radar-panel-rating-label">Overall rating</span>
+          ${ratingHTML}
         </div>
-        <hr class="omscs-radar-panel-divider" />
-        ${overview}
-      `;
-  });
+      </div>
+      <div class="omscs-radar-panel-title">${link.textContent?.trim().replace(/^[A-Z]{2,4}\s+\d{4}:\s*/, "") ?? ""}</div>
+    </div>
+    <hr class="omscs-radar-panel-divider" />
+    ${overview}
+  `;
+});
 
     link.addEventListener("mouseleave", () => {
       panel.style.display = "none";
