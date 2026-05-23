@@ -20,7 +20,7 @@ jobs:
 
       - name: Install scraper
         working-directory: scraper
-        run: pip install -e .
+        run: pip install -e ".[dev]"
 
       - name: Run scraper
         working-directory: scraper
