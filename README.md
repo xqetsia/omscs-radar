@@ -66,10 +66,6 @@ OMSCentral is a Next.js application. Rather than parsing the rendered DOM, the s
 
 OMSHub is hosted on Vercel and protected by Vercel's bot-detection layer, which serves a JavaScript challenge to non-browser HTTP clients. Simple HTTP requests receive a `429` response. Until we coordinate directly with the OMSHub maintainers or implement a headless browser approach, the project ships with OMSCentral data only.
 
-## License
-
-MIT. See [LICENSE](LICENSE).
-
 ---
 
 If you maintain OMSHub or OMSCentral and would prefer a different arrangement, please open an issue.
