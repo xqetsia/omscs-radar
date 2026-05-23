@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — OMSCS Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0f12;
+      --surface: #13161b;
+      --border: #1e2229;
+      --text: #c8cdd6;
+      --text-dim: #5a6070;
+      --accent: #4ade80;
+      --accent-dim: rgba(74, 222, 128, 0.12);
+      --heading: #edf0f5;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      line-height: 1.75;
+      min-height: 100vh;
+      padding: 0 1rem;
+    }
+
+    /* Subtle grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 5rem 0 6rem;
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 3.5rem;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(74, 222, 128, 0.25);
+      color: var(--accent);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 3px;
+      margin-bottom: 1.25rem;
+    }
+
+    .badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 500;
+      color: var(--heading);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+
+    .meta {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+    }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0;
+    }
+
+    /* Sections */
+    .section {
+      margin-bottom: 2.25rem;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .section:nth-child(2) { animation-delay: 0.05s; }
+    .section:nth-child(3) { animation-delay: 0.10s; }
+    .section:nth-child(4) { animation-delay: 0.15s; }
+    .section:nth-child(5) { animation-delay: 0.20s; }
+    .section:nth-child(6) { animation-delay: 0.25s; }
+    .section:nth-child(7) { animation-delay: 0.30s; }
+
+    h2 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    p {
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+
+    p:last-child { margin-bottom: 0; }
+
+    strong {
+      color: var(--heading);
+      font-weight: 500;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(74, 222, 128, 0.3);
+      transition: border-color 0.15s;
+    }
+
+    a:hover { border-color: var(--accent); }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0;
+    }
+
+    ul li {
+      position: relative;
+      padding-left: 1.25rem;
+      margin-bottom: 0.4rem;
+      color: var(--text);
+    }
+
+    ul li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--text-dim);
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    /* Callout card */
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+      padding: 1rem 1.25rem;
+      margin-top: 0.5rem;
+    }
+
+    .callout p { margin-bottom: 0; }
+
+    /* Footer */
+    .footer {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      animation: fadeUp 0.5s 0.35s ease both;
+    }
+
+    .footer a {
+      color: var(--text-dim);
+      border-color: transparent;
+    }
+
+    .footer a:hover { color: var(--accent); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .footer { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="header">
+      <div class="badge">Chrome Extension</div>
+      <h1>Privacy Policy</h1>
+      <p class="meta">OMSCS Radar &nbsp;·&nbsp; Last updated: May 2026</p>
+    </header>
+
+    <hr class="divider" />
+
+    <section class="section">
+      <h2>What we collect</h2>
+      <div class="callout">
+        <p><strong>Nothing personally identifiable.</strong> OMSCS Radar runs locally in your browser and does not collect, transmit, or store any personally identifying information.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>What we store locally</h2>
+      <p>The extension uses <a href="https://developer.chrome.com/docs/extensions/reference/api/storage" target="_blank" rel="noopener"><code>chrome.storage.sync</code></a> to remember one preference:</p>
+      <ul>
+        <li>Your selected data source (currently only OMSCentral is supported)</li>
+      </ul>
+      <p style="margin-top: 0.75rem;">This preference is stored in your browser only. It may sync across devices where you're signed into Chrome with the same Google account, per Chrome's standard sync behavior. We do not have access to this data.</p>
+    </section>
+
+    <section class="section">
+      <h2>What we request from the network</h2>
+      <p>The extension calls a single read-only endpoint to fetch publicly available course rating data. The request includes:</p>
+      <ul>
+        <li>Standard browser headers (no auth, no tracking)</li>
+        <li>No user identifier of any kind</li>
+        <li>No information about which Georgia Tech page you're viewing</li>
+      </ul>
+      <p style="margin-top: 0.75rem;">We do not log who is making these requests; the server does not associate requests with any user.</p>
+    </section>
+
+    <section class="section">
+      <h2>What we don't do</h2>
+      <ul>
+        <li>We do not use cookies</li>
+        <li>We do not run any analytics or tracking scripts</li>
+        <li>We do not sell, share, or rent data — there is no data to sell</li>
+        <li>We do not communicate with any service other than our own course-rating API</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Source code</h2>
+      <p>This extension is open source. You can verify all the claims above by reading the source at <a href="https://github.com/xqetsia/omscs-radar" target="_blank" rel="noopener">github.com/xqetsia/omscs-radar</a>.</p>
+    </section>
+
+    <section class="section">
+      <h2>Contact</h2>
+      <p>Questions or concerns? Open an issue on the <a href="https://github.com/xqetsia/omscs-radar/issues" target="_blank" rel="noopener">GitHub repo</a>.</p>
+    </section>
+
+    <footer class="footer">
+      <span>Georgia Tech OMSCS Radar</span>
+      <a href="https://github.com/xqetsia/omscs-radar" target="_blank" rel="noopener">github.com/xqetsia/omscs-radar</a>
+    </footer>
+
+  </div>
+</body>
+</html>
