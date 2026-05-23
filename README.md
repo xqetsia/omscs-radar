@@ -74,7 +74,7 @@ omscs-radar/
 - [x] **Phase 2** — Postgres schema, SQLAlchemy 2.0 models, Alembic migrations, scraper persists snapshots
 - [x] **Phase 3** — FastAPI backend serving `/api/courses`, deployed to Railway
 - [x] **Phase 4** — Chrome extension (Manifest V3, TypeScript)
-- [ ] **Phase 5** — GitHub Actions weekly cron, OMSHub scraper, Chrome Web Store submission
+- [ ] **Phase 5** — GitHub Actions weekly cron, Chrome Web Store submission
 
 ## Data sources
 
