@@ -47,48 +47,14 @@ The official OMSCS catalog page lists ~60 courses but tells you nothing about wh
 ``` -->
 
 ### Data Flow
-┌──────────────────┐
-│   OMSCentral     │  (community data source)
-└────────┬─────────┘
-         │ HTTP fetch
-         ▼
-┌──────────────────┐
-│   Scraper        │  (Python, weekly cron)
-│   - extract RSC  │
-│   - parse        │
-│   - normalize    │
-└────────┬─────────┘
-         │ INSERT
-         ▼
-┌──────────────────┐
-│   PostgreSQL     │  (snapshot store)
-│   on Railway     │
-└────────┬─────────┘
-         │ SELECT (latest snapshot per course)
-         ▼
-┌──────────────────┐
-│   FastAPI        │  (read interface)
-│   /api/courses   │
-└────────┬─────────┘
-         │ HTTPS
-         ▼
-┌──────────────────┐
-│ Chrome extension │  (TypeScript, MV3)
-│   - find courses │
-│   - look up data │
-│   - inject badges│
-└────────┬─────────┘
-         │ DOM injection
-         ▼
-┌──────────────────┐
-│  GT catalog page │  (what the user sees)
-└──────────────────┘
-
-- **Scrapers** run weekly via GitHub Actions, collecting aggregate ratings.
-- **Normalizer** merges both sources on course code (`CS-XXXX`) and writes a new snapshot to Postgres — historical data is preserved so we can later show trends.
-- **FastAPI backend** serves the latest snapshot via `/api/courses`, deployed on Railway.
-- **Chrome extension** (Manifest V3, TypeScript) injects rating badges next to each course on the official catalog. The user can pick a preferred source in settings.
-
+```mermaid
+flowchart TD
+    A["OMSCentral<br/>community data source"] -->|HTTP fetch| B["Scraper<br/>Python · weekly cron"]
+    B -->|INSERT| C["PostgreSQL<br/>snapshot store · Railway"]
+    C -->|"SELECT latest snapshot"| D["FastAPI<br/>/api/courses"]
+    D -->|HTTPS| E["Chrome Extension<br/>TypeScript · MV3"]
+    E -->|DOM injection| F["GT Catalog Page<br/>what the user sees"]
+```
 ## Repository layout
 
 ```
@@ -107,7 +73,7 @@ omscs-radar/
 - [x] **Phase 1** — Python scraper (OMSCentral via Next.js RSC payload, typed Pydantic models, CLI with structured logging)
 - [x] **Phase 2** — Postgres schema, SQLAlchemy 2.0 models, Alembic migrations, scraper persists snapshots
 - [x] **Phase 3** — FastAPI backend serving `/api/courses`, deployed to Railway
-- [ ] **Phase 4** — Chrome extension (Manifest V3, TypeScript)
+- [x] **Phase 4** — Chrome extension (Manifest V3, TypeScript)
 - [ ] **Phase 5** — GitHub Actions weekly cron, OMSHub scraper, Chrome Web Store submission
 
 ## Data sources
