@@ -44,10 +44,18 @@ DATABASE_URL = _normalize_url(os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL))
 
 # echo=False because we don't want every SQL statement logged in production.
 # Flip to True (or set SQLALCHEMY_ECHO=1 below) when debugging.
+#
+# connect_timeout: fail fast (10s) instead of hanging if the server/proxy
+# never responds, rather than relying on the OS's much longer TCP timeout.
+# pool_pre_ping: check a pooled connection is still alive (cheap SELECT 1)
+# before handing it out, so a connection dropped by the server/proxy while
+# idle doesn't surface as an OperationalError mid-query.
 engine = create_engine(
     DATABASE_URL,
     echo=os.getenv("SQLALCHEMY_ECHO") == "1",
     future=True,
+    connect_args={"connect_timeout": 10},
+    pool_pre_ping=True,
 )
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
